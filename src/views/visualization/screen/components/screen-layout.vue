@@ -1,7 +1,6 @@
 <template>
   <div class="screen-wrap">
     <div
-      v-if="show"
       class="screen-layout"
       :style="{
         height: `${height}px`,
@@ -15,7 +14,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, nextTick } from 'vue';
+import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
+import { useEventListener } from '@/hooks/use-event-listener';
 
 export default defineComponent({
   name: 'ScreenLayout',
@@ -35,25 +35,28 @@ export default defineComponent({
     const scaleH = ref(0);
     const scaleW = ref(0);
 
-    const show = ref(false);
-
     function calcRatio() {
-      show.value = false;
       scaleH.value = Number((document.documentElement.clientHeight / props.height).toFixed(4));
       scaleW.value = Number((document.documentElement.clientWidth / props.width).toFixed(4));
-      nextTick(() => {
-        show.value = true;
-      });
     }
 
+    let removeFn: () => void = () => {};
     onMounted(() => {
+      const { removeEvent } = useEventListener({
+        el: window,
+        name: 'resize',
+        listener: calcRatio,
+      });
+      removeFn = removeEvent;
       calcRatio();
-      window.addEventListener('resize', calcRatio);
+    });
+
+    onUnmounted(() => {
+      removeFn();
     });
     return {
       scaleW,
       scaleH,
-      show,
     };
   },
 });
