@@ -6,9 +6,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, Ref, ref, unref } from 'vue';
-import * as echarts from 'echarts';
+import { defineComponent, reactive, Ref, ref } from 'vue';
 import ModuleWrap from './module-wrap.vue';
+import { useEcharts } from '@/hooks/use-echarts';
 
 export default defineComponent({
   name: 'LeftFour',
@@ -34,21 +34,14 @@ export default defineComponent({
     ]);
     const chartRef = ref<HTMLDivElement | null>(null);
 
-    let el: HTMLDivElement | null = null;
-    let chart: echarts.ECharts | null = null;
+    const { setOptions } = useEcharts(chartRef as Ref<HTMLDivElement>);
 
-    function setOptions() {
+    function setData() {
       const series = [];
       for (let i = 0; i < 5; i++) {
         series.push(Math.floor(Math.random() * 200));
       }
-      if (!el) {
-        el = unref(chartRef as Ref<HTMLDivElement>);
-      }
-      if (!chart) {
-        chart = echarts.init(el);
-      }
-      chart.setOption({
+      const options: echarts.EChartsOption = {
         grid: {
           top: 10,
           left: 0,
@@ -167,11 +160,12 @@ export default defineComponent({
             },
           },
         ],
-      });
+      };
+      setOptions(options);
     }
 
     function typeChangeHande() {
-      setOptions();
+      setData();
     }
 
     return {

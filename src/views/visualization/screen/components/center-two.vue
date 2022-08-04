@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, Ref, unref } from 'vue';
-import * as echarts from 'echarts';
+import { defineComponent, onMounted, ref, Ref } from 'vue';
+import { useEcharts } from '@/hooks/use-echarts';
 import chinaMapJson from '../constants/china-map.json';
 import textureImg from '../assets/texture.png';
 
@@ -15,11 +15,10 @@ export default defineComponent({
     const chartRef = ref<HTMLDivElement | null>(null);
 
     onMounted(() => {
-      const el = unref(chartRef as Ref<HTMLDivElement>);
+      const { echarts, setOptions } = useEcharts(chartRef as Ref<HTMLDivElement>);
       echarts.registerMap('china', chinaMapJson as any);
-      const mapChart = echarts.init(el);
       function calcMapOptions() {
-        let option = {
+        let option: echarts.EChartsOption = {
           tooltip: {
             show: false,
           },
@@ -81,7 +80,7 @@ export default defineComponent({
                 { value: [121.48, 31.22], num: 4 },
                 { value: [116.46, 39.92], num: 14 },
                 { value: [120.19, 30.26], num: 12 },
-              ],
+              ] as any,
               symbolSize: 15,
               tooltip: {
                 padding: 0,
@@ -135,7 +134,7 @@ export default defineComponent({
             },
           ],
         };
-        mapChart.setOption(option);
+        setOptions(option);
       }
       calcMapOptions();
     });
